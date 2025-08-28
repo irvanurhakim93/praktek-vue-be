@@ -58,15 +58,27 @@ class AuthController extends Controller
 
         }
 
-        public function logout()
+        public function logout(Request $request)
         {
-            $userAuth = Auth::user();
+            try{
+                $token = JWTAuth::getToken();
 
-            Auth::logout();
-            return response()->json([
-                'success' => true,
-                'message' => 'Pengguna berhasil logout'
-            ]);
+                if (!$token) {
+                    return response()->json(['success' => 'false', 'message' => 'Token tidak ditemukan']);
+                }
+
+                JWTAuth::invalidate($token);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Berhasil Logout'
+                ]);
+            } catch (\Tymon\JWTAuth\Exceptions\JWTException $e){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal Logout,token tidak valid atau sudah kadaluarsa'
+                ], 500);
+            }
         }
 
 
